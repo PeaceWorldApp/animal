@@ -1,0 +1,162 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+    Symfony 5 All form
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
+{% endblock %}
+ 
+{% block javascripts %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <h2 class="text-center mt-5 mb-3">Symfony 5 Project Manager</h2>
+    <div class="card">
+        <div class="card-header">
+            <button class="btn btn-outline-primary" onclick="createProject()"> 
+                Create New Project
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="alert-div">
+                {# This is an alert div #}
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th width="240px">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="projects-table-body">
+                        {# Table Body #}
+                </tbody>
+                    
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1"  id="form-modal">
+        <div class="modal-dialog" >
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Project Form</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="error-div"></div>
+                {{ form_start(form) }}
+                {{ form_widget(form) }}
+                <button type="submit" class="btn btn-outline-primary mt-3" id="save-project-btn">Save Project</button>
+                {{ form_start(form) }}
+            </div>
+            </div>
+        </div>
+</div>
+
+<!-- view record modal -->
+    
+    
+
+<script type="text/javascript">
+showAllProjects();
+
+function showAllProjects(){
+    $.ajax({
+        method: "GET",
+        url: "/project",
+        success: function (response) {
+            $("#projects-table-body").html("");
+            let projects = response;
+            for (let i = 0; i < projects.length; i++) {
+                let showBtn =  '<button ' +
+                            ' onclick="showProject(' + projects[i].id + ')">Show' +
+                        '</button> ';
+                let editBtn =  '<button ' +
+                            ' onclick="editProject(' + projects[i].id + ')">Edit' +
+                        '</button> ';
+                let deleteBtn =  '<button ' +
+                            ' onclick="destroyProject(' + projects[i].id + ')">Delete' +
+                        '</button>';
+                let projectRow = '<tr>' +
+                            '<td>' + projects[i].name + '</td>' +
+                            '<td>' + projects[i].description + '</td>' +
+                            '<td>' + showBtn + editBtn + deleteBtn + '</td>' +
+                        '</tr>';
+                        $("#projects-table-body").append(projectRow);
+            }
+        },
+        error: function(response) {
+            console.log(response.responseJSON)
+        }
+    });
+    $("#info").hide();
+}
+
+function showProject(id)
+{
+    $("#name-info").html("");
+    $("#description-info").html("");
+    $.ajax({
+        url: "/project/" + id,
+        method: "GET",
+        success: function(response) {
+            let project = response
+            $("#name-info").html(project.name);
+            $("#description-info").html(project.description);
+            $("#info").show();
+        },
+        error: function(response) {
+            console.log(response.responseJSON)
+        }
+    });
+}
+
+function createProject()
+{
+    $("#alert-div").html("");
+    $("#error-div").html("");
+    $("#project_id").val("");
+    $("#project_name").val("");
+    $("#project_description").val("");
+    $("#form-modal").modal('show'); 
+}
+
+function editProject(id)
+{
+        
+    $.ajax({
+        url: "/project/" + id,
+        method: "GET",
+        success: function(response) {
+            let project = response
+            $("#alert-div").html("");
+            $("#error-div").html("");   
+            $("#project_id").val(project.id);
+            $("#project_name").val(project.name);
+            $("#project_description").val(project.description);
+            $("#form-modal").modal('show'); 
+        },
+        error: function(response) {
+            console.log(response.responseJSON)
+        }
+    });
+}
+
+ $("#save-project-btn").click(function(event ){
+    event.preventDefault();
+    if($("#update_id").val() == null || $("#update_id").val() == "")
+    {
+        storeProject();
+    } else {
+        updateProject();
+    }
+})
+</script>
+{% endblock %}

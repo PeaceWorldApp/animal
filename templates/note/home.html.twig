@@ -1,0 +1,66 @@
+{% extends "base.html.twig" %}
+{% block title %}
+    Note List
+{% endblock %}
+
+{% block javascripts %} 
+   {{ parent() }}
+   
+   <script language = "javascript">  
+      $(document).ready(function(){   
+        // $("#loadCat").on("click", function(event){  
+            $.ajax({  
+               url:        '/api/cats',  
+               type:       'GET',   
+               dataType:   'json',  
+               async:      true,  
+               
+               success: function(data, status) {  
+                  var e = $('<tr><th>Id</th><th>Name</th></tr>');  
+                  $('#cat').html('');  
+                  $('#cat').append(e);  
+                  
+                  for(i = 0; i < data.length; i++) {  
+                     catNote = data[i];  
+                     var e = $('<tr><td id = "idcat"></td><td id = "name"></td></tr>');
+                     
+                     $('#idcat', e).html(catNote['id']);  
+                     $('#name', e).html(catNote['name']);  
+                     $('#cat').append(e);  
+                  }  
+               },  
+               error : function(xhr, textStatus, errorThrown) {  
+                  alert('Ajax request failed.');  
+               }  
+            });  
+        // });  
+      }); 
+   </script> 
+{% endblock %} 
+
+{% block stylesheets %} 
+   <style> 
+      .table { border-collapse: collapse; } 
+      .table th, td { 
+         border-bottom: 1px solid #ddd; 
+         width: 250px; 
+         text-align: left; 
+         align: left; 
+      } 
+   </style> 
+{% endblock %} 
+{% block body %}
+    <div class="container">
+        <a id = "loadCat" href = "#">Load student information</a>  
+            </br> 
+            </br>  
+            
+            <table class = "table">  
+                <tbody id = "cat"></tbody>  
+            </table> 
+        {{ form_start(note_form) }}
+        {{ form_widget(note_form) }}
+        {# <input type="submit" value="submit" class="btn btn-success"/> #}
+         {{ form_end(note_form) }}    
+    </div>    
+{% endblock %}
